@@ -22,29 +22,38 @@ words = soup.find_all("div", {'class': regex})
 
 pol,rus = [],[]
 
-def remove_spaces_before(st):
+def remove_trash_before(st):
     if not len(st): return ""
+    ret = ""
     garbage_index = 0
     for char in st:
         if char in string.whitespace:
             garbage_index += 1
         else:
-            return st[garbage_index:] or ""
+            ret = st[garbage_index:] or ""
+            break
+
+    if "— " in ret[:2]:
+        ret = ret[2:]
+    return ret    
 
 for mixed_word in words:
     clean_re = re.compile('[,\.!?<>]') 
     for word in mixed_word.get_text().split("\n"):
         # cleaned_word = word.replace("\n", "").replace("\r", "").replace("\t", "").replace("-\xa0", "")
-        cleaned_word = word.replace("\n", "").replace("— ", "")
-        cleaned_word = remove_spaces_before(cleaned_word)
+        cleaned_word = remove_trash_before(word).replace("\r", "")
         if cleaned_word and len(cleaned_word):
-            print("RESULT", cleaned_word[0], cleaned_word[0].lower() in string.ascii_lowercase or cleaned_word[0] == "-")
-            if cleaned_word[0].lower() in string.ascii_lowercase or cleaned_word[0] == "-":
+            # TODO: check for - properly
+            if cleaned_word[0].lower() in string.ascii_lowercase:
                 pol.append(cleaned_word) 
             else:
                 rus.append(cleaned_word)
- 
-print(len(pol), len(rus))
+
+dict = {}
+for p,r in zip(pol, rus):
+    dict[p] = r
+
+print(dict)
 
 # print(soup.find_all("div", {'class': regex}))
 # [print(c.get_text()) for c in words]
